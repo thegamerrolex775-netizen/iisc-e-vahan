@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#102a43">
+<meta name="description" content="IISc e-Vahan Navigator — free campus routing with OpenStreetMap.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23102a43'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%235ee7c7'/%3E%3Cpath d='M21 34h22M32 22v24' stroke='%23102a43' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="iisc-eVahan.css">
+<title>IISc e-Vahan Navigator</title>
+</head>
+<body>
+<div class="app">
+  <header class="hero">
+    <div class="aurora a1"></div><div class="aurora a2"></div><div class="aurora a3"></div>
+    <div class="topbar">
+      <div class="brand"><div class="brand-icon">eV</div><div><div class="eyebrow">INDIAN INSTITUTE OF SCIENCE</div><h1>e-Vahan <span>Navigator</span></h1><p>Fast campus journeys • free map stack</p></div></div>
+      <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙️</button>
+    </div>
+    <div class="hero-pills"><span>🗺️ OpenStreetMap</span><span>🚐 Red · Green · Blue</span><span>⚡ Fastest-route algorithm</span><span>₹0 APIs</span></div>
+    <div class="search-panel">
+      <div class="search-label"><span class="status-dot"></span> DESTINATION</div>
+      <div class="search-row"><span class="search-glyph">⌕</span><input id="destinationSearch" autocomplete="off" spellcheck="false" placeholder="Search Library, Main Building, hostel…"><button id="clearSearch" class="clear-search">×</button></div>
+      <div id="suggestions"></div><div id="recent"></div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="map-shell">
+      <div class="map-head"><div><span class="section-kicker">LIVE CAMPUS MAP</span><strong>Choose a destination</strong><small>Search above or tap any point on the map</small></div><div class="map-mode">OSM</div></div>
+      <div class="map-wrap"><div id="map"></div><button id="locateBtn" class="locate-fab" title="Use my location">📍<span>My location</span></button><div class="map-legend"><span><i class="dot current"></i>You</span><span><i class="dot dest"></i>Destination</span><span><i class="dot red"></i>Red</span><span><i class="dot green"></i>Green</span><span><i class="dot blue"></i>Blue</span></div></div>
+      <div id="mapStatus" class="map-status">Ready • your location is only requested when you press My location</div>
+    </section>
+
+    <section id="selectionCard" class="destination-card hidden">
+      <div class="dest-icon">🏁</div><div class="dest-copy"><span class="section-kicker">DESTINATION</span><h2 id="destinationName">Selected location</h2><p id="destinationAddress">IISc campus</p></div>
+      <div class="dest-actions"><button id="routeBtn" class="btn primary">⚡ Find fastest route</button><button id="saveDestinationBtn" class="btn soft">♡ Save</button></div>
+    </section>
+
+    <section class="quick-grid"><button id="nearestBtn" class="quick blue-card"><b>🚐 Nearest e-Vahan</b><small>Find the closest boarding stop</small><span>→</span></button><button id="campusBtn" class="quick green-card"><b>🚌 Show route network</b><small>Display all Red / Green / Blue stops</small><span>→</span></button></section>
+
+    <section id="routeCard" class="route-card hidden">
+      <div class="route-head"><div><span class="section-kicker">FASTEST ESTIMATED JOURNEY</span><h2 id="routeTitle">Route plan</h2></div><div id="routeTime" class="time-bubble">—</div></div>
+      <div id="routeSummary" class="route-summary"></div>
+      <div id="routeSteps" class="route-steps"></div>
+      <div id="routeAlternatives" class="alternatives"></div>
+      <div class="route-note">⚠️ E-Vahan running/wait times are estimated from the route network. Once the exact trip timetable is added, the same algorithm can become timetable-aware.</div>
+    </section>
+
+    <section class="how-card"><div class="how-icon">🧠</div><div><span class="section-kicker">HOW THE ALGORITHM THINKS</span><h3>It compares walking + e-Vahan combinations</h3><p>It checks direct rides and one-transfer rides, scores each by walking time + estimated e-Vahan time + waiting/transfer penalties, then chooses the lowest total.</p></div></section>
+
+    <section class="free-card"><div>🌈</div><div><b>Built to stay ₹0</b><p>Leaflet + OpenStreetMap tiles + open pedestrian routing. No Google Maps key is needed.</p></div></section>
+  </main>
+
+  <footer><span>IISc e-Vahan Navigator</span><span>© OpenStreetMap contributors</span></footer>
+</div>
+
+<div id="settingsModal" class="modal hidden"><div id="settingsBackdrop" class="backdrop"></div><div class="modal-card"><div class="modal-head"><div><span class="section-kicker">SETTINGS</span><h2>Navigator settings</h2></div><button id="closeSettings" class="icon-btn dark">×</button></div>
+<div class="setting"><h3>Search history</h3><p>Saved only in this browser on this device.</p><button id="deleteHistory" class="btn danger">Delete search history</button></div>
+<div class="setting"><h3>Routing model</h3><p>Fastest-route mode checks direct e-Vahan rides and one-transfer journeys. Walking legs use OpenStreetMap-based pedestrian routing when available.</p></div>
+<div class="setting"><h3>Coordinate model</h3><p>Campus e-Vahan stop anchors are bundled locally so the app does not need to geocode 25 stops before it can route. They can later be replaced with verified coordinates.</p></div>
+<div class="setting"><h3>Free-service note</h3><p>OpenStreetMap tiles and public routing services are community infrastructure. Use them normally and do not bulk-download tiles or send automated high-volume requests.</p></div>
+<button id="closeSettings2" class="btn primary wide">Done</button></div></div>
+<div id="toast" class="toast"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app-config.js"></script><script src="iisc-eVahan.js"></script>
+</body></html>

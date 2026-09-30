@@ -1,0 +1,9 @@
+{
+  "name":"IISc e-Vahan Navigator",
+  "short_name":"IISc e-Vahan",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f6f8fc",
+  "theme_color":"#102a43",
+  "description":"Free IISc campus e-Vahan route planner using OpenStreetMap"
+}
